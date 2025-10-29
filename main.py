@@ -148,7 +148,6 @@ ALLOWED_ROLES: Dict[str, List[str]] = {
 
 
 def get_assigned_worker_ids() -> Set[int]:
-    """Повертає множину ID усіх працівників, які наразі десь призначені."""
     assigned_ids = set()
     for entity_list in WORKER_ASSIGNMENT_TARGETS.values():
         for item in entity_list:
@@ -158,20 +157,16 @@ def get_assigned_worker_ids() -> Set[int]:
     return assigned_ids
 
 def get_unassigned_workers() -> List[Worker]:
-    """Повертає список об'єктів Worker, які ніде не призначені."""
     assigned_ids = get_assigned_worker_ids()
     return [w for w in workers if w.id not in assigned_ids]
 
 def find_worker_by_id(worker_id: int) -> Optional[Worker]:
-    """Знаходить об'єкт Worker за ID."""
     return next((w for w in workers if w.id == worker_id), None)
 
 def find_entity_by_id(entity_list: List[Any], entity_id: int) -> Optional[Any]:
-    """Знаходить об'єкт у списку за ID."""
     return next((e for e in entity_list if e.id == entity_id), None)
 
 def display_entity_list(entity_list: List[Any], class_name: str, assignable: bool = False):
-    """Відображає список об'єктів для вибору."""
     print(f"\n--- Список об'єктів класу {class_name} ---")
     for entity in entity_list:
         worker_status = ""
@@ -193,7 +188,6 @@ def display_entity_list(entity_list: List[Any], class_name: str, assignable: boo
 
 
 def select_target_class(target_map: Dict[str, Any]) -> tuple[Optional[str], Optional[List[Any]]]:
-    """Функція для вибору класу (Cart, Scanner, Security і т.д.)"""
     print("\nДе Ви хочете це зробити? (Виберіть клас)")
     class_names = list(target_map.keys())
     for i, name in enumerate(class_names):
@@ -215,7 +209,6 @@ def select_target_class(target_map: Dict[str, Any]) -> tuple[Optional[str], Opti
 
 
 def handle_worker_assignment(assign: bool):
-    """Обробляє призначення/видалення працівника з урахуванням ролей."""
     action_verb = "Призначення" if assign else "Видалення"
     print(f"\n===== {action_verb} працівника =====")
 
@@ -292,7 +285,6 @@ def handle_worker_assignment(assign: bool):
 
 
 def handle_parameter_assignment(assign: bool):
-    """Обробляє призначення/видалення параметрів."""
     action_verb = "Призначення" if assign else "Видалення"
     print(f"\n===== {action_verb} параметра =====")
 
@@ -367,7 +359,6 @@ def handle_parameter_assignment(assign: bool):
 
 
 def menu_main():
-    """Головне меню програми."""
     while True:
         print("\n" + "=" * 40)
         print("          СИСТЕМА УПРАВЛІННЯ СКЛАДОМ")
@@ -396,4 +387,5 @@ def menu_main():
             print("❌ Невірний вибір. Спробуйте ще раз.")
 
 if __name__ == "__main__":
+
     menu_main()
