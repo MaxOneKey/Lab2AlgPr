@@ -7,6 +7,10 @@ STATUSES = ["в дорозі", "доставлено", "на складі", "н�
 ZONES = ["Зона A", "Зона B", "Зона C", "Склад 1"]
 ROUTE_STATUSES = ["активний", "завершений"]
 SHIPPING_TYPES = ["повітряний", "автомобільний", "дроновий"]
+SHIFT_TYPES = ["денна", "нічна"]
+STATUSES = ["працює", "у відпустці", "на лікарняному"]
+DEPARTMENTS = ["логістика", "комірник", "доставка"]
+ROBOT_TASKS = ["сортування", "зарядка", "очікування", "калібрування"]
 
 
 @dataclass
@@ -15,7 +19,7 @@ class Truck:
     capacity: int 
     model: str
     current_status: str
-    zone: str
+    zone: Optional[str] = None
     route_id: Optional[int] = None  
 
 
@@ -30,7 +34,7 @@ class StorageSystem:
 @dataclass
 class ShippingZone:
     id: int
-    zone_name: str
+    zone_name: Optional[str] = None
     available_capacity: int
 
 
@@ -260,4 +264,90 @@ def select_target_class(target_map: Dict[str, Any]) -> tuple[Optional[str], Opti
         
     except ValueError:
         print("❌ Невірний формат введення.")
+
         return None, None
+def assign_worker_to_entity(class_name: str):
+    entity_list = ENTITY_LISTS[class_name]
+    unassigned = get_unassigned_workers()
+    print(f"\nВільні працівники для {class_name}:")
+    for w in unassigned:
+        print(f"{w.id}: {w.name} ({w.position})")
+    try:
+        worker_id = int(input("Введіть ID працівника: "))
+        worker = find_worker_by_id(worker_id)
+        if not worker or worker.id not in [w.id for w in unassigned]:
+            print("❌ Невірний працівник")
+            return
+        entity_id = int(input(f"Введіть ID об'єкта {class_name}: "))
+        entity = find_entity_by_id(entity_list, entity_id)
+        if not entity:
+            print("❌ Об'єкт не знайдено")
+            return
+   
+        if worker.position not in ALLOWED_ROLES[class_name]:
+            print(f"❌ Працівник має роль '{worker.position}', потрібна: {ALLOWED_ROLES[class_name]}")
+            return
+        if hasattr(entity, 'worker_id'):
+            entity.worker_id = worker.id
+        elif hasattr(entity, 'driver_id'):
+            entity.driver_id = worker.id
+        print(f"✅ Працівник {worker.name} призначений на {class_name} ID {entity.id}")
+    except ValueError:
+        print("❌ Невірний ввід")
+
+def assign_route_to_truck():
+    display_entity_list(trucks, "Truck")
+    display_entity_list(routes, "Route")
+    try:
+        truck_id = int(input("Введіть ID вантажівки: "))
+        truck = find_entity_by_id(trucks, truck_id)
+        if not truck:
+            print("❌ Вантажівка не знайдена")
+            return
+        route_id = int(input("Введіть ID маршруту: "))
+        route = find_entity_by_id(routes, route_id)
+        if not route:
+            print("❌ Маршрут не знайдено")
+            return
+        if route_id not in truck.assigned_routes:
+            truck.assigned_routes.append(route_id)
+        if truck_id not in route.assigned_trucks:
+            route.assigned_trucks.append(truck_id)
+        print(f"✅ Маршрут ID {route.id} призначено вантажівці ID {truck.id}")
+    except ValueError:
+        print("❌ Невірний ввід")
+
+
+def menu_main():
+    while True:
+        print("\n" + "="*40)
+        print("          СИСТЕМА УПРАВЛІННЯ СКЛАДОМ")
+        print("="*40)
+        print("1. Призначити працівника")
+        print("2. Призначити маршрут вантажівці")
+        print("3. Показати всі об'єкти")
+        print("4. Вихід")
+        choice = input("Ваш вибір: ")
+        if choice == "1":
+            print("Куди призначити працівника?")
+            for i, c in enumerate(WORKER_ASSIGNMENT_TARGETS.keys()):
+                print(f"{i+1}. {c}")
+            try:
+                cls_choice = int(input("Вибір: "))
+                class_name = list(WORKER_ASSIGNMENT_TARGETS.keys())[cls_choice-1]
+                assign_worker_to_entity(class_name)
+            except:
+                print("❌ Невірний ввід")
+        elif choice == "2":
+            assign_route_to_truck()
+        elif choice == "3":
+            for cls, lst in ENTITY_LISTS.items():
+                display_entity_list(lst, cls)
+        elif choice == "4":
+            print("Вихід")
+            break
+        else:
+            print("❌ Невірний вибір")
+
+if __name__ == "__main__":
+    menu_main()
