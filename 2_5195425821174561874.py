@@ -35,8 +35,8 @@ class StorageSystem:
 @dataclass
 class ShippingZone:
     id: int
-    zone_name: Optional[str] = None
     available_capacity: int
+    zone_name: Optional[str] = None
 
 
 @dataclass
@@ -147,22 +147,36 @@ ENTITY_LISTS: Dict[str, List[Any]] = {
     "Packages": packages,
     "Drone": drones,
     "Client": clients,
+    "Cart": carts,
+    "Scanner": scanners,
+    "Security": securities,
+    "ShiftManager": shift_managers,
+    "SortingRobot": sorting_robots,
 }
 
 WORKER_ASSIGNMENT_TARGETS: Dict[str, List[Any]] = {
     "Truck": trucks,
     "Drone": drones,
+    "Cart": carts,
+    "Scanner": scanners,
+    "Security": securities,
 }
 
 PARAMETER_ASSIGNMENT_TARGETS: Dict[str, Dict[str, List[str]]] = {
     "Truck": {"current_status": TRUCK_STATUSES, "zone": ZONES},
     "Route": {"status": ROUTE_STATUSES},
     "Drone": {"status": WORKER_STATUSES},
+    "Cart": {"status": WORKER_STATUSES, "zone": ZONES},
+    "ShiftManager": {"status": WORKER_STATUSES, "shift_type": SHIFT_TYPES, "department": DEPARTMENTS, "zone": ZONES, "note": []},
+    "SortingRobot": {"current_task": ROBOT_TASKS},
 }
 
 ALLOWED_ROLES: Dict[str, List[str]] = {
     "Truck": ["оператор", "логіст"],
     "Drone": ["оператор дронів"],
+    "Cart": ["оператор", "комірник", "логіст"],
+    "Scanner": ["оператор", "комірник", "диспетчер"],
+    "Security": ["охоронець", "менеджер зміни"],
 }
 
 
@@ -326,12 +340,28 @@ def menu_main():
         print("\n" + "="*40)
         print("          СИСТЕМА УПРАВЛІННЯ СКЛАДОМ")
         print("="*40)
-        print("1. Призначити працівника")
-        print("2. Призначити маршрут вантажівці")
-        print("3. Показати всі об'єкти")
-        print("4. Вихід")
+        print("1. Призначити працівника (Cart/Security/Scaner)")
+        print("2. Видалити працівника (Unassign Worker)")
+        print("3. Призначити/Змінити параметр (Set Parameter)")
+        print("4. Видалити параметр (Unset Parameter)")
+        print("5. Призначити працівника(Truck/Drone)")
+        print("6. Призначити маршрут вантажівці")
+        print("7. Показати всі об'єкти")
+        print("8. Вихід")
+        
+        
+        
         choice = input("Ваш вибір: ")
-        if choice == "1":
+
+        if choice == '1':
+            handle_worker_assignment(assign=True)
+        elif choice == '2':
+            handle_worker_assignment(assign=False)
+        elif choice == '3':
+            handle_parameter_assignment(assign=True)
+        elif choice == '4':
+            handle_parameter_assignment(assign=False)
+        elif choice == "5":
             print("Куди призначити працівника?")
             for i, c in enumerate(WORKER_ASSIGNMENT_TARGETS.keys()):
                 print(f"{i+1}. {c}")
@@ -341,12 +371,12 @@ def menu_main():
                 assign_worker_to_entity(class_name)
             except:
                 print("❌ Невірний ввід")
-        elif choice == "2":
+        elif choice == "6":
             assign_route_to_truck()
-        elif choice == "3":
+        elif choice == "7":
             for cls, lst in ENTITY_LISTS.items():
                 display_entity_list(lst, cls)
-        elif choice == "4":
+        elif choice == "8":
             print("Вихід")
             break
         else:
@@ -354,4 +384,5 @@ def menu_main():
 
 if __name__ == "__main__":
     menu_main()
+
 
