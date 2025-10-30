@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Any, Dict, Set
 
 
-STATUSES = ["в дорозі", "доставлено", "на складі", "неактивний"]
+TRUCK_STATUSES = ["в дорозі", "доставлено", "на складі", "неактивний"]
 ZONES = ["Зона A", "Зона B", "Зона C", "Склад 1"]
 ROUTE_STATUSES = ["активний", "завершений"]
 SHIPPING_TYPES = ["повітряний", "автомобільний", "дроновий"]
 SHIFT_TYPES = ["денна", "нічна"]
-STATUSES = ["працює", "у відпустці", "на лікарняному"]
+WORKER_STATUSES = ["працює", "у відпустці", "на лікарняному"]
 DEPARTMENTS = ["логістика", "комірник", "доставка"]
 ROBOT_TASKS = ["сортування", "зарядка", "очікування", "калібрування"]
 
@@ -20,7 +20,8 @@ class Truck:
     model: str
     current_status: str
     zone: Optional[str] = None
-    route_id: Optional[int] = None  
+    route_id: Optional[int] = None
+    assigned_routes: List[int] = field(default_factory=list)
 
 
 @dataclass
@@ -45,6 +46,8 @@ class Route:
     end_zone: str
     distance: float 
     status: str
+    assigned_trucks: List[int] = field(default_factory=list)
+
 
 
 @dataclass
@@ -152,9 +155,9 @@ WORKER_ASSIGNMENT_TARGETS: Dict[str, List[Any]] = {
 }
 
 PARAMETER_ASSIGNMENT_TARGETS: Dict[str, Dict[str, List[str]]] = {
-    "Truck": {"current_status": STATUSES, "zone": ZONES},
+    "Truck": {"current_status": TRUCK_STATUSES, "zone": ZONES},
     "Route": {"status": ROUTE_STATUSES},
-    "Drone": {"status": STATUSES},
+    "Drone": {"status": WORKER_STATUSES},
 }
 
 ALLOWED_ROLES: Dict[str, List[str]] = {
@@ -351,3 +354,4 @@ def menu_main():
 
 if __name__ == "__main__":
     menu_main()
+
